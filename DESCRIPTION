@@ -1,0 +1,11 @@
+Package: rBioHelp
+Type: Package
+Title: Helper functions for analysis of omics data
+Version: 1.0
+Date: 2020-12-17
+Author: Mathurin Dorel
+Maintainer: Mathurin Dorel <mathurin.dorel@molgen.mpg.de>
+Description: Helper functions for analysis of omics data, includes better GO sets and venn diagrams
+License: What license is it under?
+RoxygenNote: 7.1.1
+LazyData: true
