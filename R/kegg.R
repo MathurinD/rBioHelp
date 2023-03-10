@@ -9,7 +9,7 @@
 #' @param kegg_result Output of enrichKEGG or enrichGO
 #' @param max_terms The maximum number of terms to display on the plot
 #' @value The input with an extra column richFactor
-plotKEGG <- function(kegg_result, max_terms=10) {
+plotKEGG <- function(kegg_result, max_terms=10, ylab='KEGG pathway', title=paste('Enrichment score of', ylab)) {
     kegg_result %>% mutate(richFactor = Count / as.numeric(sub("/\\d+", "", BgRatio))) -> kegg_tibble
     if (nrow(kegg_tibble)==0) {
         message('No enriched terms, skipping...')
@@ -18,6 +18,7 @@ plotKEGG <- function(kegg_result, max_terms=10) {
               ggplot(aes(richFactor, fct_reorder(Description, richFactor))) +
               geom_segment(aes(xend=0, yend = Description)) +
               geom_point(aes(color=p.adjust, size = Count))+
+              ggtitle(title) + ylab(ylab) +
               scale_color_gradientn(colours=c("#f7ca64", "#46bac2", "#7e62a3"),guide=guide_colorbar(reverse=TRUE, order=1))
         )
     }
