@@ -31,7 +31,7 @@ exclude <- function(set1, set2) { return(set1[!set1 %in% set2]) }
 #' Make an euler diagram, always works exactly up to 3 sets, then has to approximate so use equisurface venn diagram
 #' @param vennlist A named list where each entry is a vector of the elements of the set
 #' @export
-customVenn <- function(vennlist) {
+customVenn <- function(vennlist, main='') {
     if (is.null(names(vennlist))) {
         conditions = paste0('set', 1:length(vennlist))
     } else {
@@ -66,5 +66,5 @@ customVenn <- function(vennlist) {
         # TODO check that the fit is appropriate or try again to find a better one, importantly no category should not be represented
     }
     values = efit$original.values
-    plot(efit, counts=TRUE, font=1, cex=2, quantities=paste0(values, "\n(", signif(values*100/sum(values), 2), "%)"), type="percent")
+    eulerr:::plot.euler(efit, counts=TRUE, font=1, cex=2, quantities=paste0(values, "\n(", signif(values * 100/sum(values), 2), "%)"), type="percent", main=main)
 }
