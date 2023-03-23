@@ -28,6 +28,7 @@ readGMT <- function(gmt_file, format='hugo.') {
 #'
 #' Kinase Substrate Enrichment Analysis
 #' @param sig One signature
+#' @export
 ksea <- function(sig, signame='default') { # Implement from the methods of Wiredja 2017
     lfc_phospho %>% toGenes %>% filter(ID %in% sig) %>% summarise_at(vars(-ID), mean, na.rm=TRUE) -> mean_substrate
     lfc_phospho %>% toGenes %>% summarise_at(vars(-ID), mean, na.rm=TRUE) -> mean_all
