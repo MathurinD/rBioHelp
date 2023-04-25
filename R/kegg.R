@@ -1,7 +1,7 @@
 # Functions to display enrichment results from clusterProfiler
 # Can be GO or KEGG output
 
-#' @import forecast
+# @import forecast
 
 #' @title Plot KEGG result
 #'
