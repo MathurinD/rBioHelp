@@ -12,7 +12,7 @@
 #' @export
 #' @rdname starHeatmap
 starHeatmap2 <- function(hm_values, data, encoding="size", return_list=FALSE, range=-5:-1, hm_type='Value', star_type='log p-value', threshold=0, ...) {
-    data = data %>% .[nrow(.):-1:1,,drop=FALSE] %>% as.matrix
+    data = data %>% .[nrow(.):1,,drop=FALSE] %>% as.matrix
     min_hm = quantile(as.matrix(hm_values[!is.infinite(as.matrix(hm_values))]), 0.05)
     max_hm = quantile(as.matrix(hm_values[!is.infinite(as.matrix(hm_values))]), 0.95)
     if (min_hm >= 0) { hm_colors = circlize::colorRamp2(c(0, max_hm), c("white","red")) }
@@ -21,7 +21,7 @@ starHeatmap2 <- function(hm_values, data, encoding="size", return_list=FALSE, ra
     data[is.infinite(data)] = max(abs(range))
     if (encoding == 'size') {
         out = list(
-            object=hm_values %>% .[nrow(.):-1:1,,drop=FALSE] %>%
+            object = hm_values %>%
                 Heatmap(name=hm_type, cell_fun=function(j, i, x, y, width, height, fill) {
                     if(!is.na(data[i,j]) && abs(data[i,j]) > threshold) { grid.text("*", x, y-unit(0.2, "lines"), gp=gpar(fontsize=30*data[i,j]/max(abs(range)))) }
                 }, cluster_rows=FALSE, cluster_columns=FALSE, row_names_side="left", col=hm_colors, border=TRUE, column_title_side="bottom", ...),
@@ -29,7 +29,7 @@ starHeatmap2 <- function(hm_values, data, encoding="size", return_list=FALSE, ra
         )
     } else if (encoding == 'multi_count') {
         out = list(
-            object = hm_values %>% .[nrow(.):-1:1,,drop=FALSE] %>%
+            object = hm_values %>%
                 Heatmap(name=hm_type, cell_fun=function(j, i, x, y, width, height, fill) {
                     if(!is.na(data[i,j]) && abs(data[i,j]) > threshold) { if(is.infinite(data[i,j])){data[i,j]=max(abs(range))}; grid.text(paste0(rep("*", floor(abs(data[i,j])/max(abs(range))*5)), collapse=""), x, y-unit(0.2, "lines"), gp=gpar(fontsize=20)) }
                 }, cluster_rows=FALSE, cluster_columns=FALSE, row_names_side="left", col=hm_colors, border=TRUE, column_title_side="bottom", ...),
@@ -37,9 +37,9 @@ starHeatmap2 <- function(hm_values, data, encoding="size", return_list=FALSE, ra
         )
     } else if (encoding == 'count') {
         out = list(
-            object=hm_values %>% .[nrow(.):-1:1,,drop=FALSE] %>%
+            object = hm_values %>%
                 Heatmap(name=hm_type, cell_fun=function(j, i, x, y, width, height, fill) {
-                    if(!is.na(data[i,j]) && abs(data[i,j]) > threshold) { if(is.infinite(data[i,j])){data[i,j]=max(abs(range))};  grid.text(gsub("(.{3})", "\\1\n", paste0(rep("*", floor(data[i,j]/10)), collapse="")), x, y-unit(0.2, "lines"), gp=gpar(fontsize=20)) }
+                    if(!is.na(data[i,j]) && abs(data[i,j]) > threshold) { if(is.infinite(data[i,j])){data[i,j]=max(abs(range))};  grid.text(gsub("(.{3})", "\\1\n", paste0(rep("*", floor(abs(data[i,j]/10))), collapse="")), x, y-unit(0.2, "lines"), gp=gpar(fontsize=20)) }
                 }, cluster_rows=FALSE, cluster_columns=FALSE, row_names_side="left", col=hm_colors, border=TRUE, column_title_side="bottom", ...),
                 annotation_legend_list = list(Legend(title=star_type, at=range, labels=range, pch=floor(abs(range)/max(abs(range))*5) %>% sapply(function(nn){paste0(rep("*", nn), collapse="")}), type="points"))
             )
