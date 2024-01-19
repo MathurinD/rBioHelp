@@ -2,26 +2,26 @@
 % Please edit documentation in R/heatmaps.R
 \name{starHeatmap2}
 \alias{starHeatmap2}
-\title{Heatmap with stars for extra data}
+\title{Heatmap with stars for extra information}
 \usage{
 starHeatmap2(
   hm_values,
-  data,
+  star_values,
   encoding = "size",
   return_list = FALSE,
-  range = -5:-1,
+  range = -5:-2,
   hm_type = "Value",
-  star_type = "log p-value",
-  threshold = 0,
+  star_type = "log10(p-value)",
+  threshold = 2,
   ...
 )
 }
 \arguments{
 \item{hm_values}{Values for the colors of the heatmap tiles}
 
-\item{data}{Values for the text (or number of stars) of the heatmap tiles. Should be all >=0 or all <=0.}
+\item{star_values}{Values for the text (or number of stars) of the heatmap tiles. Should be all >=0 or all <=0.}
 
-\item{encoding}{One of c('size', 'count', 'multi_count') for whether the value in data should be encoded by the size of one star or a number of stars on one or multiple lines}
+\item{encoding}{One of c('size', 'count', 'multi_count') for whether the value in star_values should be encoded by the size of one star or a number of stars on one or multiple lines}
 
 \item{return_list}{If FALSE the heatmap is plotted with a legend, if TRUE returns a list with fields 'object' for the Heatmap object and 'annotation_legend_list' for the annotation corresponding to the encoding.}
 
@@ -34,5 +34,6 @@ starHeatmap2(
 \item{threshold}{Threshold under which the stars are not plotted.}
 }
 \description{
-Plot heatmap with stars in the tile to encode for another data layer (significance, effect size, etc)
+Plot heatmap with stars in the tile to encode for another information layer (significance, effect size, etc)
+The range and threshold defaults consider the star values are log10-pvalues,
 }
