@@ -1,5 +1,6 @@
 #' @title Wrapper for wikiprofiler wpplot and wp_bgfill
 #' @import wikiprofiler
+#' @import org.Hs.eg.db
 #' @param ftable A data table with columns 'Gene' for gene names and 'beta' for the metric to plot
 #' @export
 #' @rdname wpplot
@@ -7,6 +8,7 @@ WPplot <- function(ftable, pathwayid='WP4172', high="red", low="blue", legend = 
     wpplot(pathwayid) %>% WPbgfill(ftable %>% select(Gene, beta) %>% column_to_rownames('Gene') %>% {setNames(t(.), rownames(.))} %>% sort)
 }
 
+#' @param ftable Either a tibble in long format with columns 'multi', Gene and beta containing the conditions, the gene symbols and the value to plot respectively; or a matrix with the conditions as column names and the genes as row names.
 #' @param multi The name of the colum with the conditions
 #' @export
 #' @rdname wpplot
@@ -14,7 +16,7 @@ WPmultiplot <- function(ftable, pathwayid='WP4172', multi='Cell_line', high="red
     if (multi %in% colnames(ftable)) {
         wpplot(pathwayid) %>% WPbgfill(ftable %>% rename(multi=!!multi) %>% group_by(Gene, multi) %>% summarise(beta=mean(beta)) %>% ungroup %>% select(Gene, beta, multi) %>% pivot_wider(names_from=multi, values_from=beta) %>% column_to_rownames('Gene'))
     } else {
-        message(paste0('No "', multi, '" column in the data, assuming it is already in wide format'))
+        message(paste0('No multi ("', multi, '") column in the data, assuming it is already in wide matrix format'))
         wpplot(pathwayid) %>% WPbgfill(ftable)
     }
 }
@@ -78,12 +80,20 @@ WPbgfill <- function(pp, value, high="red", low="blue", legend = TRUE, legend_x 
       message('Parameters legend_x and legend_y must be numbers between 0 to 1!')
     }
     # Filter for genes in the pathway
-    if(!any(rownames(value) %in% SYMBOLS)){
-      message("Please make sure the input gene ID type is 'SYMBOL'")
-      return(pp)
-    }
     SYMBOLS <- sub('\\s+', '', sub('>', '', sub('</text', '', pp$svg[grep('</text', pp$svg)])))
     SYMBOLS <- SYMBOLS[is.na(suppressWarnings(as.numeric(SYMBOLS)))]
+    if(!any(rownames(value) %in% SYMBOLS)){
+        if (all(grepl('^ENSG', rownames(value)))) { # Auto detection Ensembl Ids
+            message("Ensembl IDs detected, automatic conversion to SYMBOL and averaging over identical names.")
+            value = value %>% as_tibble(rownames='Gene') %>% mutate(Gene=mapIds(org.Hs.eg.db, Gene, 'SYMBOL', 'ENSEMBL')) %>% group_by(Gene) %>% summarise_all(mean) %>% filter(!is.na(Gene)) %>% column_to_rownames('Gene')
+        } else if(all(grep('^[A-Z0-9]{6,10}$', rownames(value)))){ # https://www.uniprot.org/help/accession_numbers
+            message("Uniprot IDs detected, automatic conversion to SYMBOL and averaging over identical names.")
+            value = value %>% as_tibble(rownames='Gene') %>% mutate(Gene=mapIds(org.Hs.eg.db, Gene, 'SYMBOL', 'UNIPROT')) %>% group_by(Gene) %>% summarise_all(mean) %>% filter(!is.na(Gene)) %>% column_to_rownames('Gene')
+        } else {
+            message("Please make sure the input gene ID type is 'SYMBOL'.")
+            return(pp)
+        }
+    }
     value <- value[rownames(value) %in% SYMBOLS,]
     #value <- sort(value[names(value) %in% SYMBOLS])
 

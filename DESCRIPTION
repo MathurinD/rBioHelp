@@ -7,5 +7,5 @@ Author: Mathurin Dorel
 Maintainer: Mathurin Dorel <mathurin.dorel@molgen.mpg.de>
 Description: Helper functions for analysis of omics data, includes better GO sets and venn diagrams
 License: What license is it under?
-RoxygenNote: 7.1.1
+RoxygenNote: 7.2.3
 LazyData: true
