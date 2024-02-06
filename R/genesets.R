@@ -12,11 +12,19 @@ genesetsOverview <- function(clusters, ...)  {
     msig_rich = clusters %>% pull(Entrez) %>% enricher(TERM2GENE=msigdb%>% distinct(term, Entrez), ...)
     go_rich =clusters %>% pull('Entrez') %>% enrichGO(org.Hs.eg.db, ...)
 
-    enriched_sets = wp_rich %>% as_tibble %>% mutate(genes=str_split(geneID, '/'))  %>%
-        bind_rows(kegg_rich %>% as_tibble %>% mutate(genes=str_split(geneID, '/')) ) %>%
-        bind_rows(go_rich %>% as_tibble %>% mutate(genes=str_split(geneID, '/')) ) %>%
-        bind_rows(msig_rich %>% as_tibble %>% mutate(genes=str_split(geneID, '/')) ) %>%
-        bind_rows(reactome_rich %>% as_tibble %>% mutate(genes=str_split(geneID, '/')) %>% mutate(genes=lapply(genes, function(gg){mapIds(org.Hs.eg.db, gg, 'ENTREZID','UNIPROT')})))
+    enriched_sets = NULL
+    if (!is.null(wp_rich))
+        enriched_sets = bind_rows(enriched_sets, wp_rich %>% as_tibble %>% mutate(genes=str_split(geneID, '/')))
+    if (!is.null(kegg_rich))
+        enriched_sets = bind_rows(kegg_rich %>% as_tibble %>% mutate(genes=str_split(geneID, '/')) )
+    if (!is.null(go_rich))
+        enriched_sets = bind_rows(go_rich %>% as_tibble %>% mutate(genes=str_split(geneID, '/')) )
+    if (!is.null(msig_rich))
+        enriched_sets = bind_rows(msig_rich %>% as_tibble %>% mutate(genes=str_split(geneID, '/')) )
+    if (!is.null(reactome_rich))
+        enriched_sets = bind_rows(reactome_rich %>% as_tibble %>% mutate(genes=str_split(geneID, '/')) %>% mutate(genes=lapply(genes, function(gg){mapIds(org.Hs.eg.db, gg, 'ENTREZID','UNIPROT')})))
+
+    if (is.null(enriched_sets)) { stop('No gene sets enriched') }
     
     enriched_sets %>% pull(genes) %>% unlist %>% unique -> attributed_genes
     enriched_sets %>% bind_rows( tibble(ID='unattributed', Description='Genes not in an enriched gene set', pvalue=1, genes=list(clusters$Entrez[!clusters$Entrez %in% attributed_genes])) ) -> enriched_sets
