@@ -6,7 +6,7 @@
 #'
 #' @title Generates combinations separated by '&'
 #'
-#' Generates all combinations or the elements in a vector.
+#' @description Generates all combinations or the elements in a vector.
 #' @param vec A vector with names
 #' @param low_order Whether to return the low order combinations or only the full
 combiSet <- function(vec, low_order=TRUE) {

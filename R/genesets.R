@@ -1,4 +1,9 @@
 #' @import clusterProfiler
+#' @import tidyverse
+
+library(tidyverse)
+library(org.Hs.eg.db)
+library(clusterProfiler)
 reactome = read_tsv('/project/pe_data/reference/genesets/UniProt2Reactome.txt', col_names=c('Uniprot','RPID','URL','Name','Evidence','Species')) %>% filter(Species=='Homo sapiens') %>% mutate(Gene=mapIds(org.Hs.eg.db, keys=Uniprot, column='SYMBOL', keytype='UNIPROT'))
 msigdb = read.gmt('/project/pe_data/reference/genesets/h.all.v7.4.symbols.gmt') %>% as_tibble%>% mutate(Entrez=mapIds(org.Hs.eg.db, keys=gene, column='ENTREZID', keytype='SYMBOL'))
 

@@ -2,9 +2,7 @@
 % Please edit documentation in R/kegg.R
 \name{plotKEGG}
 \alias{plotKEGG}
-\title{Plot KEGG result
-
-Compute and plots the rich factor for the enriched pathways or terms.}
+\title{Plot KEGG result}
 \usage{
 plotKEGG(
   kegg_result,
@@ -24,8 +22,9 @@ plotKEGG(
 
 \item{ref_rep}{Representation of the reference enrichment, either the richFactor is computed using the reference set count as the denominator ('one'), or the richFactor of the reference set is displayed on the plot ('plot')}
 }
+\value{
+The input with an extra column richFactor
+}
 \description{
-Plot KEGG result
-
 Compute and plots the rich factor for the enriched pathways or terms.
 }

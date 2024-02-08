@@ -8,7 +8,7 @@
 
 #' @title Reduce a set of GO terms to higher order terms
 #'
-#' Reduce a set of GO terms to higher order terms defined in "slims" from http://geneontology.org/docs/download-ontology/#subsets. See http://geneontology.org/docs/go-subset-guide/ for more details
+#' @description Reduce a set of GO terms to higher order terms defined in "slims" from http://geneontology.org/docs/download-ontology/#subsets. See http://geneontology.org/docs/go-subset-guide/ for more details
 #' @param goset A semicolon-separated (";") set of GO terms
 #' @export
 findGenericGO <- function(goset, generic_set = GOBP1) {

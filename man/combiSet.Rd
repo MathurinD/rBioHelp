@@ -2,9 +2,7 @@
 % Please edit documentation in R/venn.R
 \name{combiSet}
 \alias{combiSet}
-\title{Generates combinations separated by '&'
-
-Generates all combinations or the elements in a vector.}
+\title{Generates combinations separated by '&'}
 \usage{
 combiSet(vec, low_order = TRUE)
 }
@@ -14,7 +12,5 @@ combiSet(vec, low_order = TRUE)
 \item{low_order}{Whether to return the low order combinations or only the full}
 }
 \description{
-Generates combinations separated by '&'
-
 Generates all combinations or the elements in a vector.
 }

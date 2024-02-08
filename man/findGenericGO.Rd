@@ -2,9 +2,7 @@
 % Please edit documentation in R/go.R
 \name{findGenericGO}
 \alias{findGenericGO}
-\title{Reduce a set of GO terms to higher order terms
-
-Reduce a set of GO terms to higher order terms defined in "slims" from http://geneontology.org/docs/download-ontology/#subsets. See http://geneontology.org/docs/go-subset-guide/ for more details}
+\title{Reduce a set of GO terms to higher order terms}
 \usage{
 findGenericGO(goset, generic_set = GOBP1)
 }
@@ -12,7 +10,5 @@ findGenericGO(goset, generic_set = GOBP1)
 \item{goset}{A semicolon-separated (";") set of GO terms}
 }
 \description{
-Reduce a set of GO terms to higher order terms
-
 Reduce a set of GO terms to higher order terms defined in "slims" from http://geneontology.org/docs/download-ontology/#subsets. See http://geneontology.org/docs/go-subset-guide/ for more details
 }

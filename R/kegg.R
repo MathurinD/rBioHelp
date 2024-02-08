@@ -5,12 +5,12 @@
 
 #' @title Plot KEGG result
 #'
-#' Compute and plots the rich factor for the enriched pathways or terms.
+#' @description Compute and plots the rich factor for the enriched pathways or terms.
 #' @param kegg_result Output of enrichKEGG or enrichGO
 #' @param max_terms The maximum number of terms to display on the plot
 #' @param ref_enrichment Output of enrichKEGG or enrichGO for the universe set
 #' @param ref_rep Representation of the reference enrichment, either the richFactor is computed using the reference set count as the denominator ('one'), or the richFactor of the reference set is displayed on the plot ('plot')
-#' @value The input with an extra column richFactor
+#' @return The input with an extra column richFactor
 #' @export
 plotKEGG <- function(kegg_result, max_terms=10, ylab='KEGG pathway', title=paste('Enrichment score of', ylab), ref_enrichment='', ref_rep='one') {
     kegg_result %>% mutate(richFactor = Count / as.numeric(sub("/\\d+", "", BgRatio))) -> kegg_tibble
