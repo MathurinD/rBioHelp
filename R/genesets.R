@@ -16,13 +16,13 @@ genesetsOverview <- function(clusters, ...)  {
     if (!is.null(wp_rich))
         enriched_sets = bind_rows(enriched_sets, wp_rich %>% as_tibble %>% mutate(genes=str_split(geneID, '/')))
     if (!is.null(kegg_rich))
-        enriched_sets = bind_rows(kegg_rich %>% as_tibble %>% mutate(genes=str_split(geneID, '/')) )
+        enriched_sets = bind_rows(enriched_sets, kegg_rich %>% as_tibble %>% mutate(genes=str_split(geneID, '/')) )
     if (!is.null(go_rich))
-        enriched_sets = bind_rows(go_rich %>% as_tibble %>% mutate(genes=str_split(geneID, '/')) )
+        enriched_sets = bind_rows(enriched_sets, go_rich %>% as_tibble %>% mutate(genes=str_split(geneID, '/')) )
     if (!is.null(msig_rich))
-        enriched_sets = bind_rows(msig_rich %>% as_tibble %>% mutate(genes=str_split(geneID, '/')) )
+        enriched_sets = bind_rows(enriched_sets, msig_rich %>% as_tibble %>% mutate(genes=str_split(geneID, '/')) )
     if (!is.null(reactome_rich))
-        enriched_sets = bind_rows(reactome_rich %>% as_tibble %>% mutate(genes=str_split(geneID, '/')) %>% mutate(genes=lapply(genes, function(gg){mapIds(org.Hs.eg.db, gg, 'ENTREZID','UNIPROT')})))
+        enriched_sets = bind_rows(enriched_sets, reactome_rich %>% as_tibble %>% mutate(genes=str_split(geneID, '/')) %>% mutate(genes=lapply(genes, function(gg){mapIds(org.Hs.eg.db, gg, 'ENTREZID','UNIPROT')})))
 
     if (is.null(enriched_sets)) { stop('No gene sets enriched') }
     
