@@ -65,3 +65,22 @@ t2v <- function(tt) {
     if (length(nn) < 2) { stop("Wrong dimensions for t2v, the tible should have 2 columns") }
     setNames(tt[[nn[2]]], tt[[nn[1]]])
 }
+
+#' Build a named vector with all node names, so that it is valid for Rgraphviz::makeNodeAttrs
+#'
+#' @param partial A named vector with node names as names and a value to set as value
+#' @param graph The graph for which the attribute will be set
+#' @para default_value, the value to set for the other nodes, uses the node name if default_value=='names' (useful for setting label).
+#' @examples
+#' \dontrun{ makeNodeAttrs(graph, fill=nodeElement(setNames(1='blue'), graph, 'red'), label=nodeElement(setNames(1='text'), graph, "names")) }
+nodeElement <- function(partial, graph, default_value) {
+    nn = names(nodeData(graph))
+    if (default_value=="names") {
+        nn = setNames(nn, nn)
+    } else {
+        nn = setNames(rep(default_value, length(nn)), nn)
+    }
+    partial = partial[names(partial)[names(partial)%in%names(nn)]]
+    nn[names(partial)]=partial
+    return(nn)
+}
