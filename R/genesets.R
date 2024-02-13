@@ -84,3 +84,54 @@ nodeElement <- function(partial, graph, default_value) {
     nn[names(partial)]=partial
     return(nn)
 }
+
+#' Compute genesets enrichment for click clusters and plot the graph of gene sets relationships
+#'
+#' @param clusters Gene cluster assignement data.frame with columns Ensembl
+#' @param clusters_enrichment A list with the enriched gene sets for each cluster
+#' @param top_sets Number of top genesets to use for each CLICK cluster
+#' @param max_sets Maximum number of genesets to plot
+#' @param lwd_scaling Max line width, effectively the factor used to scale the line width in relation to the proportion of overlap in the gene sets. Use a high value if low overlaps are expected
+#' @param cluster_downscaling CLICK clusters are way larger than genesets
+#' @example
+#' \donotrun{
+#' clusters %>% group_by(Cluster) %>% group_map(function(xx,yy){genesetsOverview(xx) %>% mutate(Cluster=yy$Cluster) %>% suppressMessages}) -> c_riches # Clusters enrichment
+#' clusterSetsGraph(clusters, c_riches)
+#'}
+clusterSetsGraph <- function(clusters, clusters_enrichment, top_sets=5, max_sets=50, lwd_scaling=10, node_label='Description', node_size='fixed') {
+    clusters_enrichment %>% lapply(arrange, pvalue) %>% lapply(head, top_sets) %>% lapply(function(xx){xx %>% separate(GeneRatio, c('d','n'), '/', FALSE, TRUE) %>% mutate(prop=d/n) }) %>% lapply(mutate, Description=gsub('HALLMARK_','', Description)) -> clusters_enrichment
+    clusters_enrichment %>% bind_rows %>% filter(ID!='unattributed') %>% group_by(ID) %>% summarise(pvalue=min(pvalue)) %>% ungroup %>% arrange(pvalue) %>% head(n=max_sets) %>% distinct(ID) %>% pull -> genesets # Extract the most representative gene sets for the graph
+    #missing_gs = genesets[!genesets %in% names(PATH2TERM)]
+    #if (length(missing_gs) > 0) { warning(paste("Gene sets", paste(missing_gs, collapse=','), "not present in the PATH2TERM internal database")) }
+
+    point2inch=72 # 1 inch (idth unit) is 72 pt (font unit)
+    # TODO fill nodes with piecharts the number of genes attributed to a geneset
+    # Plot cluster-geneset graph from enrichment results (edges are proportion of the gene set covered by the cluster list)
+    clusters_enrichment %>% bind_rows %>% filter(ID %in% genesets) %>% select(`node_label`, Cluster, prop) %>% rename(from=`node_label`, to='Cluster', weight='prop') -> graph_edges
+    #cgsedges %>% mutate(name=gsub('\\|','~',ename)) %>% group_by(name) %>% {setNames(group_split(.), group_keys(.)$name)} %>% {.[names(.) %in% edgeNames(cgsgraph)]}
+    cgsgraph = graph_edges %>% select(from, to) %>% as.matrix %>% ftM2graphNEL(edgemode='undirected')
+    clusters_enrichment %>% bind_rows %>% distinct(ID, Description) %>% filter(ID %in% names(nodeData(cgsgraph))) %>% {setNames(.$Description, .$ID)} %>% nodeElement(cgsgraph, "names") %>% sapply(function(tt){gsub('\\n', '\\\\n', str_wrap(tt, 20))}) -> bnames
+    if (node_size=='scaled') {
+        gssizes = clusters_enrichment %>% bind_rows %>% group_by(ID) %>% summarise(n=mean(n)) %>% t2v %>% c(clusters %>% group_by(Cluster) %>% mutate(Cluster=gsub('^0', ' ', sprintf('%02d', Cluster))) %>% tally  %>% t2v) %>% {log10(.)/3} %>% round(1) %>% nodeElement(cgsgraph, 0.2)
+    } else {
+        gssizes = nodeElement(c(), cgsgraph, 1) # Fixed node size is more stable, 1 works well for pdfs
+    }
+    fontsize = min(gssizes)*72/2
+    gspensizes = clusters_enrichment %>% bind_rows %>% group_by(ID) %>% summarise(n=mean(n)) %>% t2v %>% c(clusters %>% group_by(Cluster) %>% mutate(Cluster=gsub('^0', ' ', sprintf('%02d', Cluster))) %>% tally  %>% t2v) %>% nodeElement(cgsgraph, 0.2) %>% {round(./min(.)*1+0.2, 1)}
+    cgsedges = bind_rows(graph_edges %>% mutate(ename=paste(from, gsub('^0', ' ', sprintf('%02d', to)), sep='~')), graph_edges %>% mutate(ename=paste(gsub('^0', ' ', sprintf('%02d', to)), from, sep='~'))) %>% filter(ename %in% edgeNames(cgsgraph)) %>% {list(
+        lwd=setNames(ceiling(lwd_scaling*.$weight), .$ename)[edgeNames(cgsgraph)],
+        fontsize=setNames(rep(fontsize*0.75, length(.$ename)), .$ename),
+        #len=setNames(rep(max(gssizes), length(.$ename)), .$ename),
+        minlen=setNames(rep(0.2, length(.$ename)), .$ename),
+        label=setNames(sprintf("% 2d%%", round(100*.$weight)), .$ename)
+    )} # Bug in Rgraphviz, the order of the edge weights must match the order by the graph, the naming is ignored (but used properly for labels)
+    cgsnodes = makeNodeAttrs(cgsgraph,
+        fillcolor=c("#8080DD","#DD8888")[1+sapply(names(nodeData(cgsgraph)), function(xx){grepl('^[ 0-9]',xx)})], # Different colors for genesets and clusters
+        fontsize=fontsize,
+        width=gssizes, height=gssizes/3,
+        label=bnames,
+        fixedsize=T )
+    gsorc = list(list(graph=subGraph(names(nodeData(cgsgraph))[sapply(names(nodeData(cgsgraph)), function(xx){grepl('^[ 0-9]',xx)})], cgsgraph), cluster=FALSE, attrs=c(rank="sink")) ) # Bipartition geneset vs cluster (separated by the fact that cluster names are just numbers)
+    plot(cgsgraph, 'neato', attrs=list(graph=list(rankdir="LR", rank="")), nodeAttrs=cgsnodes, subGList=gsorc, edgeAttrs=cgsedges)
+}
+
