@@ -6,6 +6,7 @@ library(org.Hs.eg.db)
 library(clusterProfiler)
 reactome = read_tsv('/project/pe_data/reference/genesets/UniProt2Reactome.txt', col_names=c('Uniprot','RPID','URL','Name','Evidence','Species')) %>% filter(Species=='Homo sapiens') %>% mutate(Gene=mapIds(org.Hs.eg.db, keys=Uniprot, column='SYMBOL', keytype='UNIPROT'))
 msigdb = read.gmt('/project/pe_data/reference/genesets/h.all.v7.4.symbols.gmt') %>% as_tibble%>% mutate(Entrez=mapIds(org.Hs.eg.db, keys=gene, column='ENTREZID', keytype='SYMBOL'))
+clusterProfiler:::prepare_KEGG('hsa', "KEGG", 'kegg') -> KEGG_DATA
 
 #' 
 #' @param clusters CLICK cluster output with colums Cluster, Entrez and Uniprot
@@ -56,3 +57,11 @@ compareClusters <- function(zscores, clusters, cids) {
     print( zscores %>% filter(g %in% fcl$Ensembl) %>% column_to_rownames('g') %>% Heatmap(name='Expression z-score', bottom_annotation=HeatmapAnnotation(df=as.data.frame(patients_info)), column_title=paste('Clusters ', paste0(cids, collapse=',')), show_row_names=FALSE, show_row_dend=FALSE, right_annotation=rowAnnotation(df=fcl %>% column_to_rownames('Ensembl'))) )
 }
 
+#' Convert a two columns tibble to a named vector
+#'
+#' Wrapper for setNames
+t2v <- function(tt) {
+    nn = names(tt)
+    if (length(nn) < 2) { stop("Wrong dimensions for t2v, the tible should have 2 columns") }
+    setNames(tt[[nn[2]]], tt[[nn[1]]])
+}
