@@ -1,5 +1,7 @@
 #' @import clusterProfiler
 #' @import tidyverse
+#' @import org.Hs.eg.db
+#' @import Rgraphviz
 
 library(tidyverse)
 library(org.Hs.eg.db)
@@ -110,7 +112,7 @@ clusterSetsGraph <- function(clusters, clusters_enrichment, top_sets=5, max_sets
     clusters_enrichment %>% bind_rows %>% filter(ID %in% genesets) %>% select(`node_label`, Cluster, prop) %>% rename(from=`node_label`, to='Cluster', weight='prop') -> graph_edges
     #cgsedges %>% mutate(name=gsub('\\|','~',ename)) %>% group_by(name) %>% {setNames(group_split(.), group_keys(.)$name)} %>% {.[names(.) %in% edgeNames(cgsgraph)]}
     cgsgraph = graph_edges %>% select(from, to) %>% as.matrix %>% ftM2graphNEL(edgemode='undirected')
-    clusters_enrichment %>% bind_rows %>% distinct(ID, Description) %>% filter(ID %in% names(nodeData(cgsgraph))) %>% {setNames(.$Description, .$ID)} %>% nodeElement(cgsgraph, "names") %>% sapply(function(tt){gsub('\\n', '\\\\n', str_wrap(tt, 20))}) -> bnames
+    clusters_enrichment %>% bind_rows %>% distinct(ID, Description) %>% filter(ID %in% names(nodeData(cgsgraph))) %>% {setNames(.[[node_label]], .$ID)} %>% nodeElement(cgsgraph, "names") %>% sapply(function(tt){gsub('\\n', '\\\\n', str_wrap(tt, 20))}) -> bnames
     if (node_size=='scaled') {
         gssizes = clusters_enrichment %>% bind_rows %>% group_by(ID) %>% summarise(n=mean(n)) %>% t2v %>% c(clusters %>% group_by(Cluster) %>% mutate(Cluster=gsub('^0', ' ', sprintf('%02d', Cluster))) %>% tally  %>% t2v) %>% {log10(.)/3} %>% round(1) %>% nodeElement(cgsgraph, 0.2)
     } else {
