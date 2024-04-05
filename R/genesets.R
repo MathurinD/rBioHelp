@@ -69,7 +69,7 @@ t2v <- function(tt) {
 #'
 #' @param partial A named vector with node names as names and a value to set as value
 #' @param graph The graph for which the attribute will be set
-#' @para default_value, the value to set for the other nodes, uses the node name if default_value=='names' (useful for setting label).
+#' @param default_value, the value to set for the other nodes, uses the node name if default_value=='names' (useful for setting label).
 #' @examples
 #' \dontrun{ makeNodeAttrs(graph, fill=nodeElement(setNames(1='blue'), graph, 'red'), label=nodeElement(setNames(1='text'), graph, "names")) }
 nodeElement <- function(partial, graph, default_value) {
@@ -92,7 +92,7 @@ nodeElement <- function(partial, graph, default_value) {
 #' @param max_sets Maximum number of genesets to plot
 #' @param lwd_scaling Max line width, effectively the factor used to scale the line width in relation to the proportion of overlap in the gene sets. Use a high value if low overlaps are expected
 #' @param cluster_downscaling CLICK clusters are way larger than genesets
-#' @example
+#' @examples
 #' \donotrun{
 #' clusters %>% group_by(Cluster) %>% group_map(function(xx,yy){genesetsOverview(xx) %>% mutate(Cluster=yy$Cluster) %>% suppressMessages}) -> c_riches # Clusters enrichment
 #' clusterSetsGraph(clusters, c_riches)
