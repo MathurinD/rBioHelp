@@ -11,7 +11,8 @@ clusterSetsGraph(
   max_sets = 50,
   lwd_scaling = 10,
   node_label = "Description",
-  node_size = "fixed"
+  node_size = "fixed",
+  graphic_scaling = 1
 )
 }
 \arguments{
@@ -24,6 +25,10 @@ clusterSetsGraph(
 \item{max_sets}{Maximum number of genesets to plot}
 
 \item{lwd_scaling}{Max line width, effectively the factor used to scale the line width in relation to the proportion of overlap in the gene sets. Use a high value if low overlaps are expected}
+
+\item{node_size}{Either 'fixed' or 'scaled' to control if the node size should be variable with the size of the gene set.}
+
+\item{graphic_scaling}{Integer for fine control of the scaling of the font and node sizes}
 
 \item{cluster_downscaling}{CLICK clusters are way larger than genesets}
 }

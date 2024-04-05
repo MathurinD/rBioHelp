@@ -12,6 +12,7 @@ LazyData: true
 Encoding: UTF-8
 Depends:
 	tidyverse,
+	ComplexHeatmap,
     GO.db,
 	BiocGenerics,
 	Rgraphviz,
