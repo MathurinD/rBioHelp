@@ -10,6 +10,8 @@ nodeElement(partial, graph, default_value)
 \item{partial}{A named vector with node names as names and a value to set as value}
 
 \item{graph}{The graph for which the attribute will be set}
+
+\item{default_value, }{the value to set for the other nodes, uses the node name if default_value=='names' (useful for setting label).}
 }
 \description{
 Build a named vector with all node names, so that it is valid for Rgraphviz::makeNodeAttrs

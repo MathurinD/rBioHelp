@@ -10,6 +10,7 @@ clusterProfiler:::prepare_KEGG('hsa', "KEGG", 'kegg') -> KEGG_DATA
 #' 
 #' @param clusters CLICK cluster output with colums Cluster, Entrez and Uniprot
 #' @rdname genesetsOverview
+#' @export
 genesetsOverview <- function(clusters, ...)  {
     kegg_rich = clusters %>% pull(Entrez) %>% enrichKEGG('hsa', ...)
     wp_rich = clusters %>% pull(Entrez) %>% enrichWP('Homo sapiens', ...)
@@ -40,9 +41,11 @@ genesetsOverview <- function(clusters, ...)  {
 #' @param clusters CLICK cluster output with colums Cluster, Entrez and Uniprot
 #' @param selection Clusters on which gene set enrichment should be performed
 #' @rdname genesetsOverview
+#' @export
 genesetsFromCluster <- function(clusters, selection, ...) { genesetsOverview(clusters %>% filter(Cluster %in% selection), ...) }
 
 #' Nicely display 
+#' @export
 pretty_rich <- function(rich){
     knitr::kable(rich %>% mutate(genes=lapply(genes, function(gg){suppressMessages(mapIds(org.Hs.eg.db, gg, 'SYMBOL', 'ENTREZID'))})) %>% dplyr::select(ID, Description, pvalue, genes))
 }
@@ -51,6 +54,7 @@ pretty_rich <- function(rich){
 #' @param clusters CLICK cluster output with colums Cluster and Ensembl
 #' @param cids Ids of the clusters to plot
 #' @rdname genesetsOverview
+#' @export
 compareClusters <- function(zscores, clusters, cids) {
     fcl = clusters %>% filter(Cluster %in% cids) %>% mutate(Cluster=as.factor(Cluster)) %>% select(Cluster, Ensembl)
     print( zscores %>% filter(g %in% fcl$Ensembl) %>% column_to_rownames('g') %>% Heatmap(name='Expression z-score', bottom_annotation=HeatmapAnnotation(df=as.data.frame(patients_info)), column_title=paste('Clusters ', paste0(cids, collapse=',')), show_row_names=FALSE, show_row_dend=FALSE, right_annotation=rowAnnotation(df=fcl %>% column_to_rownames('Ensembl'))) )
@@ -59,6 +63,7 @@ compareClusters <- function(zscores, clusters, cids) {
 #' Convert a two columns tibble to a named vector
 #'
 #' Wrapper for setNames
+#' @export
 t2v <- function(tt) {
     nn = names(tt)
     if (length(nn) < 2) { stop("Wrong dimensions for t2v, the tible should have 2 columns") }
@@ -97,6 +102,7 @@ nodeElement <- function(partial, graph, default_value) {
 #' clusters %>% group_by(Cluster) %>% group_map(function(xx,yy){genesetsOverview(xx) %>% mutate(Cluster=yy$Cluster) %>% suppressMessages}) -> c_riches # Clusters enrichment
 #' clusterSetsGraph(clusters, c_riches)
 #'}
+#' @export
 clusterSetsGraph <- function(clusters, clusters_enrichment, top_sets=5, max_sets=50, lwd_scaling=10, node_label='Description', node_size='fixed') {
     clusters_enrichment %>% lapply(arrange, pvalue) %>% lapply(head, top_sets) %>% lapply(function(xx){xx %>% separate(GeneRatio, c('d','n'), '/', FALSE, TRUE) %>% mutate(prop=d/n) }) %>% lapply(mutate, Description=gsub('HALLMARK_','', Description)) -> clusters_enrichment
     clusters_enrichment %>% bind_rows %>% filter(ID!='unattributed') %>% group_by(ID) %>% summarise(pvalue=min(pvalue)) %>% ungroup %>% arrange(pvalue) %>% head(n=max_sets) %>% distinct(ID) %>% pull -> genesets # Extract the most representative gene sets for the graph

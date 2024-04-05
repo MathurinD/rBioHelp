@@ -30,3 +30,9 @@ clusterSetsGraph(
 \description{
 Compute genesets enrichment for click clusters and plot the graph of gene sets relationships
 }
+\examples{
+\donotrun{
+clusters \%>\% group_by(Cluster) \%>\% group_map(function(xx,yy){genesetsOverview(xx) \%>\% mutate(Cluster=yy$Cluster) \%>\% suppressMessages}) -> c_riches # Clusters enrichment
+clusterSetsGraph(clusters, c_riches)
+}
+}

@@ -55,6 +55,8 @@ replace_bg <- function(svg, gene, positions, colors) {
     return(svg)
 }
 
+#' @import org.Hs.eg.db
+#' @import BiocGenerics
 
 #' @title Fill the background of gene with color according to amount of gene expression.
 #' @description Generate a color array.Fill the gene then generate the legend.
@@ -66,8 +68,6 @@ replace_bg <- function(svg, gene, positions, colors) {
 #' @param legend_x horizontal position of the legend
 #' @param legend_y vertical position of the legend
 #' @return A 'wpplot' object
-# @import org.Hs.eg.db
-# @import BiocGenerics
 #' @export
 WPbgfill <- function(pp, value, high="red", low="blue", legend = TRUE, legend_x = 0.001, legend_y = 0.94, strip_out=0.01, fixed_range=F, lim=5) {
 #high="red"; low="blue"; legend = TRUE; legend_x = 0.001; legend_y = 0.94; strip_out=0.01; fixed_range=F; lim=5

@@ -11,11 +11,11 @@ RoxygenNote: 7.2.3
 LazyData: true
 Encoding: UTF-8
 Depends:
+	tidyverse,
     GO.db,
 	BiocGenerics,
 	Rgraphviz,
 	clusterProfiler,
 	eulerr,
 	org.Hs.eg.db,
-	tidyverse,
 	wikiprofiler
