@@ -9,7 +9,8 @@
 #' A set of functions that implement common operations used when analysing human biological datasets.
 #' Aggregates several packages I like and versions of datasets I use.
 #'
-#+ setup, echo=FALSE, message=FALSE
+#+ setup, results='hide', message=FALSE
+    knitr::opts_chunk$set(warning=FALSE, cache=TRUE, message=FALSE)
     suppressPackageStartupMessages(library(rBioHelp))
     library(tidyverse)
     library(ComplexHeatmap)
@@ -28,20 +29,24 @@
                     ) %>% column_to_rownames('Name')
 
 #' The package provides several helper functions to compare gene clusters (e.g DEGs after different treatments, coregulated modules, etc).
+#'
+#' The `genesetsOverview` function performs enrichment on KEGG, Wikipathway, GO, MsigDB hallmarks and Reactome to give a full overview of the roles of the genes in the list.
+#' A speficic geneset source can easily be extracted by filtering for ID patterns (hsa*, WP*, GO:*, HALLMARK* and non matching respectivel).<br/>
+#' The last entry contains the genes from the lists that are not in any of the enriched gene sets.
+#' Those singletons highlight a gap in the gene sets databases (and sometimes in knowledge).
 #+ genesets
     # Simply plot the expression/zscores with sample annotation
     compareClusters(zscores, clusters, 1:2) # TODO have patients_info as argument
     customVenn(list(MAPK=geneslist, S_Phase=geneslist2)) # Compare gene sets
 
-    # Alternative to clusterProfiler::dotplot
-    wpenrich = enrichWP(clusters$Entrez, 'Homo sapiens')
-    plotEnrichment(wpenrich)
-
     # Compute enrichment using multiple gene set sources for each gene group
-    suppressMessages(genesetsOverview(clusters)) %>% tail %>% pretty_rich()
+    wpenrich = suppressMessages(genesetsOverview(clusters))
+    plotEnrichment(wpenrich) # Alternative to clusterProfiler::dotplot
+    # List of genes in the genesets
+    wpenrich %>% {bind_rows(head(.), tail(.))} %>% pretty_rich()
 
-#' A graph between gene sets helps to better visualise the coverage by the various gene sets enriched.
-#' NOTE: The implementation does not show the overlaps between the gene sets, which should always be considered when analysing gene set enrichment results
+#' A graph between gene sets helps to better visualise the coverage by the various gene sets enriched.<br/>
+#' NOTE: The implementation does not show the overlaps between the gene sets, which should always be considered when analysing gene set enrichment results,
 #+ genesets_graph
     clusters_enrichment = clusters %>% group_by(Cluster) %>%
         group_map(function(xx,yy){genesetsOverview(xx) %>% mutate(Cluster=yy$Cluster) %>% suppressMessages})
