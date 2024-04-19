@@ -105,7 +105,7 @@ nodeElement <- function(partial, graph, default_value) {
 #' clusterSetsGraph(clusters, c_riches)
 #'}
 #' @export
-clusterSetsGraph <- function(clusters, clusters_enrichment, top_sets=5, max_sets=50, lwd_scaling=10, node_label='Description', node_size='fixed', graphic_scaling=1) {
+clusterSetsGraph <- function(clusters, clusters_enrichment, top_sets=5, max_sets=50, lwd_scaling=10, node_label='Description', node_size='fixed', graphic_scaling=1, link_genesets=TRUE, link_threshold=0.5) {
     # Preprocess the data
     ## Compute the overlap between each cluster and its enriched gene set.
     clusters_enrichment %>% lapply(arrange, pvalue) %>% lapply(head, top_sets) %>% lapply(function(xx){xx %>% separate(GeneRatio, c('d','n'), '/', FALSE, TRUE) %>% mutate(prop=d/n) }) %>% lapply(mutate, Description=gsub('HALLMARK_','', Description)) -> clusters_enrichment
@@ -121,8 +121,26 @@ clusterSetsGraph <- function(clusters, clusters_enrichment, top_sets=5, max_sets
     ## Make node labels unique
     used_enrichments %>% group_by(!!sym(node_label), Cluster) %>% tally %>% filter(n>1) %>% pull(`node_label`) -> dup_labels # Description present in several annotations
     used_enrichments %>% mutate(!!node_label:=case_when(!!sym(node_label) %in% dup_labels~paste(!!sym(node_label), ID), TRUE~!!sym(node_label))) -> used_enrichments
+    ## Compute genesets overlap
+    gs_links = tibble(from=c(), to=c(), weight=c())
+    left_enrichments = used_enrichments
+    if ("genes" %in% colnames(used_enrichments) & link_genesets) {
+        for (gs1 in unique(used_enrichments[[node_label]])) {
+            genes1 = filter(used_enrichments, !!sym(node_label)==gs1)$genes[1] %>% unlist
+            left_enrichments = left_enrichments %>% filter(!!sym(node_label) != gs1)
+            for (gs2 in unique(left_enrichments[[node_label]])) {
+                if (gs1 != gs2) {
+                    genes2 = filter(used_enrichments, !!sym(node_label)==gs2)$genes[1] %>% unlist
+                    gs_links = bind_rows(gs_links, tibble(from=gs1, to=gs2,
+                                    weight=length(intersect(genes1, genes2))/min(length(genes2), length(genes1)) ) )
+                }
+            }
+        }
+        gs_links = gs_links %>% filter(weight > link_threshold)
+    }
     ## Generate the edge list
-    used_enrichments %>% bind_rows %>% filter(ID %in% genesets) %>% select(!!node_label, Cluster, prop) %>% rename(from=!!node_label, to='Cluster', weight='prop') -> graph_edges
+    used_enrichments %>% bind_rows %>% filter(ID %in% genesets) %>% select(!!node_label, Cluster, prop) %>% rename(from=!!node_label, to='Cluster', weight='prop') %>% mutate(to=as.character(to)) -> graph_edges
+    graph_edges = bind_rows(graph_edges, gs_links)
     if (is.numeric(graph_edges$to)) { graph_edges$to = sprintf('% 2d', graph_edges$to) }
     #cgsedges %>% mutate(name=gsub('\\|','~',ename)) %>% group_by(name) %>% {setNames(group_split(.), group_keys(.)$name)} %>% {.[names(.) %in% edgeNames(cgsgraph)]}
     ## Generate the graph
